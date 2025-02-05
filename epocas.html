@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red Neuronal - Cálculo de Épocas</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table, th, td { border: 1px solid #000; border-collapse: collapse; padding: 8px; }
+        th, td { text-align: center; }
+        .explanation { margin-top: 20px; font-size: 14px; }
+        button { padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+    </style>
+</head>
+<body>
+
+    <h1>Formulario para Calcular Épocas</h1>
+
+    <!-- Formulario de Entrada de Datos -->
+    <form id="dataForm">
+        <label for="xValue">Valor de X:</label>
+        <input type="number" id="xValue" required>
+        <label for="yValue">Valor de Y:</label>
+        <input type="number" id="yValue" required>
+        <button type="submit">Agregar</button>
+    </form>
+
+    <h3>Resultados por Época</h3>
+    <table id="resultTable">
+        <thead>
+            <tr>
+                <th>X</th>
+                <th>Y</th>
+                <th>W</th>
+                <th>A</th>
+                <th>Error (E)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Aquí se agregarán los resultados -->
+        </tbody>
+    </table>
+
+    <div class="explanation">
+        <h4>Explicación de las columnas:</h4>
+        <ul>
+            <li><strong>X:</strong> El valor de entrada o característica utilizada para la predicción.</li>
+            <li><strong>Y:</strong> El valor esperado o real al que queremos llegar.</li>
+            <li><strong>W:</strong> El peso o parámetro que se ajusta durante el entrenamiento del modelo.</li>
+            <li><strong>A:</strong> El valor predicho calculado con el peso y el valor de X.</li>
+            <li><strong>Error (E):</strong> El error cuadrático medio entre el valor esperado (Y) y el valor predicho (A).</li>
+        </ul>
+    </div>
+
+    <!-- Botón para regresar a la página principal -->
+    <button onclick="window.location.href='home.html'">Regresar a Inicio</button>
+
+    <script>
+        let w = 1; // Peso inicial
+        let eta = 0.1; // Tasa de aprendizaje
+        let data = []; // Array para almacenar los datos de X, Y
+        let epoch = 1;
+
+        // Función que maneja el evento de enviar el formulario
+        document.getElementById('dataForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            let x = parseFloat(document.getElementById('xValue').value);
+            let y = parseFloat(document.getElementById('yValue').value);
+
+            // Agregar los valores ingresados al arreglo de datos
+            data.push({ x, y });
+
+            // Limpiar campos de entrada
+            document.getElementById('xValue').value = '';
+            document.getElementById('yValue').value = '';
+
+            // Ejecutar cálculo de la época
+            calculateEpoch();
+        });
+
+        // Función que calcula los valores de cada época
+        function calculateEpoch() {
+            let totalError = 0;
+            let resultHtml = '';
+            let newW = w; // Mantener la misma variable de peso a través de la época
+
+            // Recorrer cada par de datos y calcular los valores de A, error y actualizar W
+            data.forEach(({ x, y }) => {
+                let a = newW * x; // Calcular A
+                let error = 0.5 * Math.pow(y - a, 2); // Error cuadrático medio
+
+                // Actualizar el peso según la fórmula proporcionada
+                newW = newW - eta * (a - y) * x;
+
+                // Acumular el error total
+                totalError += error;
+
+                // Formatear los valores para mostrar en la tabla
+                resultHtml += `<tr>
+                    <td>${x}</td>
+                    <td>${y}</td>
+                    <td>${formatNumber(newW)}</td> <!-- Muestra el peso con un formato adecuado -->
+                    <td>${formatNumber(a)}</td> <!-- Muestra A con un formato adecuado -->
+                    <td>${formatNumber(error)}</td> <!-- Muestra el error con un formato adecuado -->
+                </tr>`;
+            });
+
+            // Actualizar la tabla con los resultados de esta época
+            document.getElementById('resultTable').getElementsByTagName('tbody')[0].innerHTML = resultHtml;
+
+            // Mostrar el error total para esta época en la consola
+            console.log(`Época ${epoch} - Error Total (MSE): ${totalError.toFixed(6)}`);
+
+            // Incrementar el contador de épocas
+            epoch++;
+        }
+
+        // Función para formatear los números y asegurar que los decimales sean apropiados
+        function formatNumber(value) {
+            // Si el valor es entero, no mostrar decimales
+            if (Math.floor(value) === value) {
+                return value;
+            } else {
+                return value.toFixed(2); // Redondear a 2 decimales
+            }
+        }
+    </script>
+
+</body>
+</html>
