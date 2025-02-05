@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Matriz de Confusión</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        h2 {
+            text-align: center;
+            color: #27445D; /* Título con el color #27445D */
+            margin-top: 20px;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px; /* Max-width para que se vea bien en móviles */
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #27445D; /* Color de los botones igual al título */
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #1c3b4e; /* Color al hacer hover en el botón */
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .result {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .back-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #008CBA;
+            color: white;
+            font-size: 24px;
+            padding: 15px 30px;
+            text-align: center;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 70%;
+            margin: 30px auto;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: #006F8E;
+        }
+        .back-button:before {
+            content: "→"; /* Flecha hacia la derecha */
+            font-size: 32px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Calculadora de Matriz de Confusión</h2>
+
+    <div class="container">
+        <div class="input-group">
+            <label for="totalClientes">Total de Clientes</label>
+            <input type="number" id="totalClientes" value="200" onchange="calcularRestantes()">
+        </div>
+
+        <div class="input-group">
+            <label for="clientesFraude">Clientes que cometieron fraude (reales)</label>
+            <input type="number" id="clientesFraude" value="15" onchange="calcularRestantes()">
+        </div>
+
+        <div class="input-group">
+            <label for="clientesNoFraude">Clientes que NO cometieron fraude (reales)</label>
+            <input type="number" id="clientesNoFraude" value="185" disabled>
+        </div>
+
+        <h3>Predicciones del modelo:</h3>
+
+        <div class="input-group">
+            <label for="predFraude">Clientes predichos como Fraude</label>
+            <input type="number" id="predFraude" value="30">
+        </div>
+
+        <div class="input-group">
+            <label for="realFraudePred">Clientes realmente fraude (de los predichos como fraude)</label>
+            <input type="number" id="realFraudePred" value="5">
+        </div>
+
+        <div class="input-group">
+            <label for="predNoFraude">Clientes predichos como No Fraude</label>
+            <input type="number" id="predNoFraude" value="170">
+        </div>
+
+        <div class="input-group">
+            <label for="realNoFraudePred">Clientes realmente no fraude (de los predichos como no fraude)</label>
+            <input type="number" id="realNoFraudePred" value="160">
+        </div>
+
+        <button class="button" onclick="calcularMatriz()">Calcular</button>
+
+        <div class="result" id="resultados"></div>
+
+        <table id="matrizConfusion" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Predicción / Realidad</th>
+                    <th>Real: Fraude (Sí)</th>
+                    <th>Real: No Fraude (No)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Predicción: Fraude (Sí)</td>
+                    <td id="vp"></td>
+                    <td id="fp"></td>
+                </tr>
+                <tr>
+                    <td>Predicción: No Fraude (No)</td>
+                    <td id="fn"></td>
+                    <td id="vn"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Botón con flecha para regresar a la página principal -->
+        <a href="home.html" class="back-button"></a>
+    </div>
+
+    <script>
+        function calcularRestantes() {
+            let totalClientes = parseInt(document.getElementById('totalClientes').value);
+            let clientesFraude = parseInt(document.getElementById('clientesFraude').value);
+            let clientesNoFraude = totalClientes - clientesFraude;
+            document.getElementById('clientesNoFraude').value = clientesNoFraude;
+        }
+
+        function calcularMatriz() {
+            // Obtener los valores de los inputs
+            let clientesFraude = parseInt(document.getElementById('clientesFraude').value);
+            let clientesNoFraude = parseInt(document.getElementById('clientesNoFraude').value);
+            let predFraude = parseInt(document.getElementById('predFraude').value);
+            let realFraudePred = parseInt(document.getElementById('realFraudePred').value);
+            let predNoFraude = parseInt(document.getElementById('predNoFraude').value);
+            let realNoFraudePred = parseInt(document.getElementById('realNoFraudePred').value);
+
+            // Calcular Verdaderos Positivos, Falsos Positivos, Falsos Negativos y Verdaderos Negativos
+            let vp = realFraudePred; // Verdaderos Positivos
+            let fp = predFraude - vp; // Falsos Positivos
+            let fn = clientesFraude - vp; // Falsos Negativos
+            let vn = realNoFraudePred; // Verdaderos Negativos
+
+            // Guardar los resultados en localStorage
+            localStorage.setItem("vp", vp);
+            localStorage.setItem("fp", fp);
+            localStorage.setItem("fn", fn);
+            localStorage.setItem("vn", vn);
+
+            // Mostrar la matriz de confusión
+            document.getElementById('vp').innerText = vp + " (VP)";
+            document.getElementById('fp').innerText = fp + " (FP)";
+            document.getElementById('fn').innerText = fn + " (FN)";
+            document.getElementById('vn').innerText = vn + " (VN)";
+
+            // Mostrar la tabla
+            document.getElementById('matrizConfusion').style.display = 'table';
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculos de Matriz de Confusión</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-top: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e2f7e0;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .procedure {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+        }
+        .procedure pre {
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .back-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #008CBA;
+            color: white;
+            font-size: 24px;
+            padding: 15px 30px;
+            text-align: center;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 70%;
+            margin: 30px auto;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: #006F8E;
+        }
+        .back-button:before {
+            content: "←"; /* Flecha hacia la izquierda */
+            font-size: 32px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Calculadora de Matriz de Confusión</h1>
+
+    <div class="container">
+        <div class="form-group">
+            <label for="vp">Verdaderos Positivos (VP):</label>
+            <input type="number" id="vp" placeholder="Ingrese VP" required>
+        </div>
+
+        <div class="form-group">
+            <label for="fp">Falsos Positivos (FP):</label>
+            <input type="number" id="fp" placeholder="Ingrese FP" required>
+        </div>
+
+        <div class="form-group">
+            <label for="fn">Falsos Negativos (FN):</label>
+            <input type="number" id="fn" placeholder="Ingrese FN" required>
+        </div>
+
+        <div class="form-group">
+            <label for="vn">Verdaderos Negativos (VN):</label>
+            <input type="number" id="vn" placeholder="Ingrese VN" required>
+        </div>
+
+        <button class="button" onclick="calcularResultados()">Calcular</button>
+
+        <div id="procedimiento" class="procedure"></div>
+        <div id="resultados" class="result"></div>
+
+        <!-- Botón con flecha para regresar al index -->
+        <a href="index.html" class="back-button"></a>
+    </div>
+
+    <script>
+        function calcularResultados() {
+            // Obtener los valores de la entrada
+            const vp = parseFloat(document.getElementById('vp').value);
+            const fp = parseFloat(document.getElementById('fp').value);
+            const fn = parseFloat(document.getElementById('fn').value);
+            const vn = parseFloat(document.getElementById('vn').value);
+
+            // Validar que todos los campos estén llenos
+            if (isNaN(vp) || isNaN(fp) || isNaN(fn) || isNaN(vn)) {
+                alert("Por favor, ingrese todos los valores.");
+                return;
+            }
+
+            // Procedimiento paso a paso
+            const procedimiento = `
+                <h2>Procedimiento</h2>
+                <p><strong>1. Matriz de Confusión</strong></p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th><strong>Predicción Sí (Fraude)</strong></th>
+                            <th><strong>Predicción No (No Fraude)</strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Real Sí (Fraude)</strong></td>
+                            <td>${vp} (VP)</td>
+                            <td>${fn} (FN)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Real No (No Fraude)</strong></td>
+                            <td>${fp} (FP)</td>
+                            <td>${vn} (VN)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>2. Fórmulas y Cálculos:</strong></p>
+                <ul>
+                    <li><strong>Exactitud:</strong> (VP + VN) / (VP + VN + FP + FN) = (${vp} + ${vn}) / (${vp} + ${vn} + ${fp} + ${fn})</li>
+                    <li><strong>Precisión:</strong> VP / (VP + FP) = ${vp} / (${vp} + ${fp})</li>
+                    <li><strong>Recall:</strong> VP / (VP + FN) = ${vp} / (${vp} + ${fn})</li>
+                    <li><strong>F1 Score:</strong> 2 * (Precisión * Recall) / (Precisión + Recall)</li>
+                </ul>
+            `;
+            
+            // Cálculos de las métricas
+            const exactitud = ((vp + vn) / (vp + vn + fp + fn)) * 100;
+            const precision = (vp / (vp + fp)) * 100;
+            const recall = (vp / (vp + fn)) * 100;
+            const f1_score = (2 * precision * recall) / (precision + recall);
+
+            // Almacenar los resultados en localStorage
+            localStorage.setItem("vp", vp);
+            localStorage.setItem("fp", fp);
+            localStorage.setItem("fn", fn);
+            localStorage.setItem("vn", vn);
+            localStorage.setItem("exactitud", exactitud.toFixed(2));
+            localStorage.setItem("precision", precision.toFixed(2));
+            localStorage.setItem("recall", recall.toFixed(2));
+            localStorage.setItem("f1_score", f1_score.toFixed(2));
+
+            // Mostrar el procedimiento
+            document.getElementById('procedimiento').innerHTML = procedimiento;
+
+            // Mostrar los resultados
+            const resultados = `
+                <h2>Resultados</h2>
+                <p><strong>Exactitud:</strong> ${exactitud.toFixed(2)}%</p>
+                <p><strong>Precisión:</strong> ${precision.toFixed(2)}%</p>
+                <p><strong>Recall:</strong> ${recall.toFixed(2)}%</p>
+                <p><strong>F1 Score:</strong> ${f1_score.toFixed(2)}</p>
+            `;
+
+            document.getElementById('resultados').innerHTML = resultados;
+        }
+    </script>
+
+</body>
+</html>
